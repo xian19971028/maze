@@ -1,0 +1,317 @@
+//10527123 呂季澤 
+//10527143 葉日翔 
+//
+
+
+# include <stdio.h>
+# include <stdlib.h>
+# include <iostream>
+# define STACKMAX 100 
+
+using namespace std ;	
+
+FILE *fp , *fout;
+
+class Coordinate {
+	public :
+		int x = 0 ;
+		int y = 0 ;
+};
+
+Coordinate stack[STACKMAX] ;
+Coordinate stacktemp[STACKMAX] ;
+int top = -1 ;	
+
+class Map {      // 包裝地圖的class 
+	
+	
+	public :
+		char map[50][50] ;
+		Inputmap () ; 
+		Outputmap() ;
+		Inputmapser() ;
+		int x ;
+	    int y ;
+	    int i ;
+	    int j ;
+	    int goal ;
+	    
+	    
+};
+
+Map::Inputmap () {   //單一目標的輸入函式 
+	
+	
+	double filenum = -1 ;
+	
+	cout << "Input a file number (eg : 411, 412, 413 ) : " ;
+	
+	cin >> filenum ;    // 讀入檔案名稱 
+	
+	if ( filenum == 411 ) 
+	
+		fp=fopen("input411.txt","rt") ;
+		
+	else if ( filenum == 412 )
+	
+		fp=fopen("input412.txt","rt") ;
+		
+	else if ( filenum == 413 )
+	
+		fp=fopen("input413.txt","rt") ;
+		
+	else 
+	
+	    cout << "input" << filenum << ".txt does not exist!\n" ;
+		
+	
+	fscanf(fp,"%d%d",&x,&y );      // 讀入地圖尺寸 
+	
+	if ( filenum == 411 || filenum == 412 || filenum == 413 ) 
+		cout << x << "  " << y << "\n" ;
+		
+	for ( j = 0 ; j < x ; j++ ) {                //讀入地圖 
+		for ( i = 0 ; i < y ; i++ )  {
+			fscanf(fp," %c",&map[j][i]);
+			cout << map[j][i] ;
+		}
+		cout << "\n" ;	
+	}		
+	
+	cout << "\n" ;
+			
+} 
+
+Map::Inputmapser () {   //單一目標的輸入函式 
+	
+	
+	double filenum = -1 ;
+	
+	cout << "Input a file number (eg : 421, 422, 423 ) : " ;
+	
+	cin >> filenum ;    // 讀入檔案名稱 
+	
+	if ( filenum == 421 )
+	
+		fp=fopen("input421.txt","rt") ;
+		
+	else if ( filenum == 422 )
+	
+		fp=fopen("input422.txt","rt") ;
+		
+	else if ( filenum == 423 )
+	
+		fp=fopen("input423.txt","rt") ;
+		
+	else 
+	
+	    cout << "input" << filenum << ".txt does not exist!\n" ;
+		
+	
+	fscanf(fp,"%d%d",&x,&y );      // 讀入地圖尺寸 
+	
+	if ( filenum == 421 || filenum == 422 || filenum == 423 ) 
+		cout << x << "  " << y << "\n" ;
+		
+	for ( j = 0 ; j < x ; j++ ) {                //讀入地圖 
+		for ( i = 0 ; i < y ; i++ )  {
+			fscanf(fp," %c",&map[j][i]);
+			cout << map[j][i] ;
+		}
+		cout << "\n" ;	
+	}		
+	
+	cout << "\n" ;
+			
+} 
+
+
+Map::Outputmap() { 
+   // 輸出當前地圖 
+	for ( j = 0 ; j < x ; j++ ) {           
+	    
+		for ( i = 0 ; i < y ; i++ )  
+			cout << map[j][i];
+				
+		cout << endl ;
+				
+	}
+	cout << endl ;
+}
+
+void Push ( int y , int x , int &count ) {
+	count++ ;
+	stacktemp[count].x = x ;
+	stacktemp[count].y = y ;
+}
+
+void LetThemSame ( int count ) {
+	
+	for ( int num = 0 ; num <= count ; num ++ )
+		stack[num] = stacktemp[num] ;
+		
+}
+
+void OutputStack ( int count ){
+
+	for ( int num = 0 ; num <= count ; num ++ )
+		cout << "[" << num+1 << "] (" << stack[num].x << ", " << stack[num].y << ")\n" ;
+		
+}
+
+
+void Visit( int j, int i, Map &map1 , int pathtemp , int &path, bool &goal ) {   //經過所有路徑 
+    map1.map[j][i] = 'V' ;
+    pathtemp++ ;
+    
+    
+    if(  map1.map[j+1][i] == 'G' ||  map1.map[j][i+1] == 'G'  ||  map1.map[j-1][i] == 'G'  ||  map1.map[j][i-1] == 'G'  ) {
+    	path = pathtemp ;
+    	goal = true;
+    }
+    else {
+    // 開始下右上左走 
+		if( map1.map[j][i+1] == 'E' && path >= pathtemp ) Visit( j, i+1, map1 , pathtemp , path, goal ) ;
+		if( map1.map[j+1][i] == 'E' && path >= pathtemp ) Visit( j+1, i, map1 , pathtemp , path, goal ) ;
+		if( map1.map[j][i-1] == 'E' && path >= pathtemp ) Visit( j, i-1, map1 , pathtemp , path, goal ) ;
+		if( map1.map[j-1][i] == 'E' && path >= pathtemp ) Visit( j-1, i, map1 , pathtemp , path, goal ) ;
+	}
+	
+}
+
+void OlnyVisit(  int j, int i, Map &map2 , int &path , Map maptemp , int pathtemp ) {    //單一目標唯一有效路徑 
+
+	maptemp.map[j][i] = 'R' ;
+    Push ( j+1 , i+1 , pathtemp ) ;
+		
+    if(  maptemp.map[j+1][i] == 'G' ||  maptemp.map[j][i+1] == 'G'  ||  maptemp.map[j-1][i] == 'G'  ||  maptemp.map[j][i-1] == 'G' ) {
+    
+    	
+ 		if( map2.map[j+1][i] == 'G' ) Push ( j+2 , i+1 , pathtemp ) ;
+		if( map2.map[j][i+1] == 'G' ) Push ( j+1 , i+2 , pathtemp ) ;
+		if( map2.map[j-1][i] == 'G' ) Push ( j , i+1  , pathtemp ) ;
+		if( map2.map[j][i-1] == 'G' ) Push ( j+1 , i , pathtemp ) ;
+				  
+		if ( pathtemp < path ) { // 將目前最短路徑存入map2 
+			LetThemSame ( pathtemp ) ;
+			map2 = maptemp ;  
+			path = pathtemp + 1 ;
+		}
+    }
+	else {
+	
+	  // 開始右下左上走 
+	 	if( maptemp.map[j][i+1] == 'E' && path >= pathtemp ) OlnyVisit( j, i+1, map2 , path , maptemp , pathtemp ) ;
+	 	if( maptemp.map[j+1][i] == 'E' && path >= pathtemp ) OlnyVisit( j+1, i, map2 , path , maptemp , pathtemp ) ;
+	 	if( maptemp.map[j][i-1] == 'E' && path >= pathtemp ) OlnyVisit( j, i-1, map2 , path , maptemp , pathtemp ) ;
+	  	if( maptemp.map[j-1][i] == 'E' && path >= pathtemp ) OlnyVisit( j-1, i, map2 , path , maptemp , pathtemp ) ;
+    }
+
+		
+}
+
+int main() {
+	
+	cout << "******* Shortest Path Finding **********\n" ;
+	cout << "* 0. Quit                              *\n" ;
+	cout << "* 1. Shortest path to one goal         *\n" ;
+	cout << "* 2. Shortest path to nearest goal     *\n" ;
+	cout << "****************************************\n" ;
+	
+	int command = -1 , num = 0 ;
+	
+	int path = 1000 , car = 0 , time = 0;	
+	
+	cout << "Input a command(0, 1, 2): " ;
+	cin >> command ;             // 讀入指令 
+	
+	Map map1[50];
+	Map map2[50];
+	Map maptemp;
+	bool goal = false ;
+	
+	while ( command != 0 ) {
+		path = 1000 ; 
+		car = 0 ; 
+		time = 0 ;
+		goal = false ;
+		
+  	  if ( command == 1 ) {
+  	  	
+	    map1[num].Inputmap() ; // 從檔案讀入 
+	    
+	    map2[num] = map1[num] ;
+		  
+	   	Visit( 0, 0, map1[num] , 0 , path, goal) ;       // 走過的路徑
+		   	
+		map1[num].Outputmap() ;
+        
+        maptemp = map2[num] ; 
+        
+        path = 1000 ;
+        
+	    OlnyVisit( 0, 0, map2[num] , path , maptemp , -1 ) ; 
+
+				
+		if ( goal == false && map1[num].x != 0 )
+			cout << "#### QQ there is no food. ####" << endl ;
+		else
+			map2[num].Outputmap() ;
+		
+		if ( path != 1000 )
+			cout << "\n\nShortest path length = " << path ;
+			
+		cout << "\n\n" ;
+	      
+	    fclose(fp);
+	    
+	    
+	  }
+	  else if ( command == 2 ) {
+	    map1[num].Inputmapser() ; // 從檔案讀入 
+	    
+	    map2[num] = map1[num] ;
+		  
+	   	Visit( 0, 0, map1[num] , 0 , path, goal ) ;     // 走過的路徑
+		
+		path = 1000 ;   	
+		map1[num].Outputmap() ;
+        
+        maptemp = map2[num] ; 
+        
+	    OlnyVisit( 0, 0, map2[num] , path , maptemp , -1 ) ;
+	    if ( goal == false && map1[num].x != 0 )
+	    	cout << "#### QQ there is no food. #####" << endl ;
+	    else
+			map2[num].Outputmap() ;
+		
+		if( path != 1000 ) {
+			
+			cout << "The shortest path to the nearest goal is as follows: \n" << endl ;
+			
+			OutputStack ( path - 1 ) ;
+
+		}	
+
+		cout << "\n\n" ;
+	  fclose(fp);
+    }
+		else {
+			cout << "\n" << "Command does not exist ! \n" ;
+		}
+	  
+		cout << "******* Shortest Path Finding **********\n" ;
+		cout << "* 0. Quit                              *\n" ;
+		cout << "* 1. Shortest path to one goal         *\n" ;
+		cout << "* 2. Shortest path to nearest goal     *\n" ;
+		cout << "****************************************\n" ;
+    	cout << "Input a command(0, 1, 2): " ;	  
+    	cin >> command ;
+      
+    	num++;    // 開一張新的地圖 
+    }
+	
+   
+	
+}
+
